@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* macOS drag region for hidden title bar */
+@layer utilities {
+  .drag-region {
+    -webkit-app-region: drag;
+  }
+  .no-drag {
+    -webkit-app-region: no-drag;
+  }
+}
+
+/* 定义CSS变量用于主题切换 */
+:root {
+  /* 浅色主题变量 */
+  --bg-primary: theme('colors.surface-light');
+  --bg-card: theme('colors.surface-card');
+  --bg-card-hover: theme('colors.surface-card-hover');
+  --border-color: theme('colors.border-light');
+  --text-primary: theme('colors.text-primary-light');
+  --text-secondary: theme('colors.text-secondary-light');
+  --text-tertiary: theme('colors.text-tertiary-light');
+  --primary-color: theme('colors.primary-improved');
+  --success-color: theme('colors.success-improved');
+  --warning-color: theme('colors.warning-improved');
+  --danger-color: theme('colors.danger-improved');
+}
+
+.dark {
+  /* 深色主题变量 */
+  --bg-primary: theme('colors.surface-dark');
+  --bg-card: theme('colors.surface-card-dark');
+  --bg-card-hover: theme('colors.surface-card-hover-dark');
+  --border-color: theme('colors.border-dark');
+  --text-primary: theme('colors.text-primary-dark');
+  --text-secondary: theme('colors.text-secondary-dark');
+  --text-tertiary: theme('colors.text-tertiary-dark');
+  --primary-color: theme('colors.primary-improved-dark');
+  --success-color: theme('colors.success-improved-dark');
+  --warning-color: theme('colors.warning-improved-dark');
+  --danger-color: theme('colors.danger-improved-dark');
+}
+
+/* USB连接按钮样式 */
+.usb-connect-btn {
+  background: linear-gradient(135deg, var(--warning-color) 0%, #eab308 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.usb-connect-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3);
+}
+
+.usb-connect-btn.connected {
+  background: linear-gradient(135deg, var(--success-color) 0%, #34d399 100%);
+}
+
+.usb-connect-btn.connected:hover {
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.usb-connect-btn.disconnected {
+  background: linear-gradient(135deg, var(--danger-color) 0%, #f87171 100%);
+}
+
+.usb-connect-btn.disconnected:hover {
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
