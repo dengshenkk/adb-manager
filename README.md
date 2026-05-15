@@ -9,6 +9,18 @@
 - 实时显示连接状态
 - 配置持久化到本地 JSON 文件
 
+
+## 预览
+
+![主界面](demo/index.jpg)
+主界面 - 设备列表管理
+
+![添加设备](demo/add.jpg)
+添加设备对话框
+
+![Scrcpy](demo/scrpy.jpg)
+支持Scrcpy屏幕镜像
+
 ## 架构
 
 ```
