@@ -5,7 +5,7 @@
 import { ipcMain } from 'electron';
 import { DeviceManager } from '../core';
 import type { IConfigStore } from '../core/config-store';
-import type { Theme } from '../core/types';
+import type { Theme, TerminalApp } from '../core/types';
 
 export function registerIpcHandlers(manager: DeviceManager, store: IConfigStore): void {
   ipcMain.handle('device:list', async () => {
@@ -55,6 +55,10 @@ export function registerIpcHandlers(manager: DeviceManager, store: IConfigStore)
     return manager.launchScrcpy(id);
   });
 
+  ipcMain.handle('device:adbShell', async (_event, id: string, terminalApp: TerminalApp) => {
+    return manager.launchAdbShell(id, terminalApp);
+  });
+
   ipcMain.handle('config:getTheme', async () => {
     const config = await store.load();
     return config.theme;
@@ -63,6 +67,18 @@ export function registerIpcHandlers(manager: DeviceManager, store: IConfigStore)
   ipcMain.handle('config:setTheme', async (_event, theme: Theme) => {
     const config = await store.load();
     config.theme = theme;
+    await store.save(config);
+    return { success: true };
+  });
+
+  ipcMain.handle('config:getTerminalApp', async () => {
+    const config = await store.load();
+    return config.terminalApp;
+  });
+
+  ipcMain.handle('config:setTerminalApp', async (_event, terminalApp: TerminalApp) => {
+    const config = await store.load();
+    config.terminalApp = terminalApp;
     await store.save(config);
     return { success: true };
   });

@@ -64,12 +64,27 @@ export interface AdbDeviceRaw {
 /** Theme setting */
 export type Theme = 'light' | 'dark' | 'system';
 
+/** Terminal app setting
+ * macOS terminal emulators for opening adb shell sessions
+ */
+export type TerminalApp = 'terminal' | 'iterm2' | 'ghostty' | 'warp' | 'kitty' | 'alacritty';
+
+export const TERMINAL_APP_LABELS: Record<TerminalApp, string> = {
+  terminal: 'Terminal',
+  iterm2: 'iTerm2',
+  ghostty: 'Ghostty',
+  warp: 'Warp',
+  kitty: 'Kitty',
+  alacritty: 'Alacritty',
+};
+
 /** Persistent app configuration stored on disk */
 export interface AppConfig {
   devices: DeviceInfo[];  // Only network devices are persisted
   activeDeviceId: string | null;
   adbPath: string;       // Path to adb binary, defaults to "adb"
   theme: Theme;
+  terminalApp: TerminalApp;  // Preferred terminal for adb shell
 }
 
 /** Events emitted by DeviceManager */

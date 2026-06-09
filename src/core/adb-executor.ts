@@ -4,7 +4,7 @@
 
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
-import type { AdbResult, AdbDeviceRaw } from './types';
+import type { AdbResult, AdbDeviceRaw, TerminalApp } from './types';
 
 const execAsync = promisify(exec);
 
@@ -15,6 +15,7 @@ export interface IAdbExecutor {
   listDevices(): Promise<AdbDeviceRaw[]>;
   getAdbPath(): string;
   launchScrcpy(deviceId: string): Promise<AdbResult>;
+  launchAdbShell(deviceId: string, terminalApp: TerminalApp): Promise<AdbResult>;
   setAdbPath(path: string): void;
 }
 
@@ -150,6 +151,70 @@ export class AdbExecutor implements IAdbExecutor {
       success: true,
       message: `已启动 scrcpy 显示设备 ${deviceId}`,
     };
+  }
+
+  async launchAdbShell(deviceId: string, terminalApp: TerminalApp): Promise<AdbResult> {
+    const shellCmd = `${this.adbPath} -s ${deviceId} shell`;
+    const escapedCmd = shellCmd.replace(/"/g, '\\"');
+
+    try {
+      switch (terminalApp) {
+        case 'terminal': {
+          spawn('osascript', [
+            '-e',
+            `tell application "Terminal" to activate`,
+            '-e',
+            `tell application "Terminal" to do script "${escapedCmd}"`,
+          ], { detached: true, stdio: 'ignore' }).unref();
+          break;
+        }
+        case 'iterm2': {
+          spawn('osascript', [
+            '-e',
+            'tell application "iTerm"\n' +
+            '  activate\n' +
+            '  set newWindow to (create window with default profile)\n' +
+            `  tell current session of newWindow to write text "${escapedCmd}"\n` +
+            'end tell',
+          ], { detached: true, stdio: 'ignore' }).unref();
+          break;
+        }
+        case 'ghostty': {
+          spawn('open', ['-n', '-a', 'Ghostty', '--args', '-e', 'sh', '-c', `${shellCmd}; exec $SHELL`], {
+            detached: true, stdio: 'ignore',
+          }).unref();
+          break;
+        }
+        case 'warp': {
+          spawn('open', ['-n', '-a', 'Warp', '--args', '-e', 'sh', '-c', `${shellCmd}; exec $SHELL`], {
+            detached: true, stdio: 'ignore',
+          }).unref();
+          break;
+        }
+        case 'kitty': {
+          spawn('open', ['-n', '-a', 'kitty', '--args', 'sh', '-c', `${shellCmd}; exec $SHELL`], {
+            detached: true, stdio: 'ignore',
+          }).unref();
+          break;
+        }
+        case 'alacritty': {
+          spawn('open', ['-n', '-a', 'Alacritty', '--args', '-e', 'sh', '-c', `${shellCmd}; exec $SHELL`], {
+            detached: true, stdio: 'ignore',
+          }).unref();
+          break;
+        }
+      }
+
+      return {
+        success: true,
+        message: `已在 ${terminalApp === 'terminal' ? 'Terminal' : terminalApp} 中打开 adb shell`,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: `打开终端失败: ${err.message}`,
+      };
+    }
   }
 
   private async exec(command: string): Promise<{ stdout: string; stderr: string }> {

@@ -9,6 +9,7 @@ import type {
   AdbResult,
   DeviceManagerEvent,
   DeviceManagerEventHandler,
+  TerminalApp,
 } from './types';
 import type { IAdbExecutor } from './adb-executor';
 import type { IConfigStore } from './config-store';
@@ -226,6 +227,17 @@ export class DeviceManager {
     return this.adb.launchScrcpy(id);
   }
 
+  async launchAdbShell(id: string, terminalApp: TerminalApp): Promise<AdbResult> {
+    const device = this.devices.find((d) => d.id === id);
+    if (!device) {
+      return { success: false, message: `设备 ${id} 不存在` };
+    }
+    if (device.connectionStatus !== 'connected') {
+      return { success: false, message: '设备未连接，请先连接设备' };
+    }
+    return this.adb.launchAdbShell(id, terminalApp);
+  }
+
   async refreshStatus(): Promise<void> {
     const liveDevices = await this.adb.listDevices();
     const liveMap = new Map(liveDevices.map((d) => [d.serial, d.status]));
@@ -309,11 +321,13 @@ export class DeviceManager {
       .filter((d) => d.type === 'network')
       .map(({ id, name, address, port, type }) => ({ id, name, address, port, type }));
 
+    const config = await this.store.load();
     await this.store.save({
       devices: networkDevices,
       activeDeviceId: this.activeDeviceId,
       adbPath: this.adb.getAdbPath(),
-      theme: (await this.store.load()).theme,
+      theme: config.theme,
+      terminalApp: config.terminalApp,
     });
   }
 }

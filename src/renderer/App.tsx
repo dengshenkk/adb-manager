@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw } from 'lucide-react';
+import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw, Terminal, ChevronDown } from 'lucide-react';
 import DeviceCard from './components/DeviceCard';
 import AddDeviceDialog from './components/AddDeviceDialog';
 import ConfirmDialog from './components/ConfirmDialog';
 import Toast from './components/Toast';
-import type { DeviceState, SwitchResult, Theme } from '../core/types';
+import type { DeviceState, SwitchResult, Theme, TerminalApp } from '../core/types';
+import { TERMINAL_APP_LABELS } from '../core/types';
 
 interface ToastMessage {
   id: number;
@@ -29,6 +30,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [theme, setThemeState] = useState<Theme>('system');
   const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const [terminalApp, setTerminalAppState] = useState<TerminalApp>('terminal');
+  const [showTerminalMenu, setShowTerminalMenu] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmState>({
     open: false,
     title: '',
@@ -70,6 +73,18 @@ export default function App() {
   }, [applyTheme]);
 
   useEffect(() => {
+    async function initTerminal() {
+      try {
+        const saved = await window.api.getTerminalApp();
+        setTerminalAppState(saved);
+      } catch {
+        setTerminalAppState('terminal');
+      }
+    }
+    initTerminal();
+  }, []);
+
+  useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (theme === 'system') applyTheme('system');
@@ -88,6 +103,17 @@ export default function App() {
       addToast('error', `设置主题失败: ${err.message}`);
     }
   }, [applyTheme, addToast]);
+
+  const handleTerminalAppChange = useCallback(async (newTerminal: TerminalApp) => {
+    try {
+      await window.api.setTerminalApp(newTerminal);
+      setTerminalAppState(newTerminal);
+      setShowTerminalMenu(false);
+      addToast('success', `终端已切换为 ${TERMINAL_APP_LABELS[newTerminal]}`);
+    } catch (err: any) {
+      addToast('error', `设置终端失败: ${err.message}`);
+    }
+  }, [addToast]);
 
   const loadDevices = useCallback(async () => {
     try {
@@ -202,6 +228,19 @@ export default function App() {
     }
   }, [addToast]);
 
+  const handleLaunchAdbShell = useCallback(async (id: string) => {
+    try {
+      const result = await window.api.launchAdbShell(id, terminalApp);
+      if (result.success) {
+        addToast('success', result.message);
+      } else {
+        addToast('error', result.message);
+      }
+    } catch (err: any) {
+      addToast('error', `打开 adb shell 失败: ${err.message}`);
+    }
+  }, [addToast, terminalApp]);
+
   const handleDisconnect = useCallback((id: string) => {
     const device = devices.find(d => d.id === id);
     setConfirm({
@@ -245,7 +284,30 @@ export default function App() {
         <div className="flex items-center gap-2 no-drag">
           <div className="relative">
             <button
-              onClick={() => setShowThemeMenu(!showThemeMenu)}
+              onClick={() => { setShowTerminalMenu(!showTerminalMenu); setShowThemeMenu(false); }}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-text-secondary-light dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex items-center gap-1"
+              title="选择终端"
+            >
+              <Terminal size={16} />
+              <ChevronDown size={12} />
+            </button>
+            {showTerminalMenu && (
+              <div className="absolute right-0 top-full mt-1 w-36 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg z-50">
+                {(Object.entries(TERMINAL_APP_LABELS) as [TerminalApp, string][]).map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => handleTerminalAppChange(key)}
+                    className={`w-full px-3 py-1.5 text-left text-sm flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 ${terminalApp === key ? 'text-primary-improved dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <button
+              onClick={() => { setShowThemeMenu(!showThemeMenu); setShowTerminalMenu(false); }}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-text-secondary-light dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
               title="切换主题"
             >
@@ -300,6 +362,7 @@ export default function App() {
                 onConnect={handleConnect}
                 onRemove={handleRemove}
                 onLaunchScrcpy={handleLaunchScrcpy}
+                onLaunchAdbShell={handleLaunchAdbShell}
                 onDisconnect={handleDisconnect}
               />
             ))}

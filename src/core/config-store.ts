@@ -8,7 +8,7 @@
 
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { dirname, join } from 'path';
-import type { AppConfig, DeviceInfo, Theme } from './types';
+import type { AppConfig, DeviceInfo, Theme, TerminalApp } from './types';
 
 export interface IConfigStore {
   load(): Promise<AppConfig>;
@@ -21,6 +21,7 @@ const DEFAULT_CONFIG: AppConfig = {
   activeDeviceId: null,
   adbPath: 'adb',
   theme: 'system',
+  terminalApp: 'terminal',
 };
 
 export class JsonConfigStore implements IConfigStore {
@@ -44,6 +45,7 @@ export class JsonConfigStore implements IConfigStore {
         ...parsed,
         devices: Array.isArray(parsed.devices) ? parsed.devices : [],
         theme: parsed.theme || DEFAULT_CONFIG.theme,
+        terminalApp: parsed.terminalApp || DEFAULT_CONFIG.terminalApp,
       };
     } catch {
       return { ...DEFAULT_CONFIG };

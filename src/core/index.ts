@@ -25,4 +25,6 @@ export type {
   AppConfig,
   DeviceManagerEvent,
   DeviceManagerEventHandler,
+  TerminalApp,
 } from './types';
+export { TERMINAL_APP_LABELS } from './types';

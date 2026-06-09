@@ -1,4 +1,4 @@
-import { Wifi, WifiOff, Trash2, Loader2, Usb, Monitor, Unplug, Link } from 'lucide-react';
+import { Wifi, WifiOff, Trash2, Loader2, Usb, Monitor, Unplug, Link, Terminal } from 'lucide-react';
 import type { DeviceState } from '../../core/types';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
   onConnect?: (id: string) => void;
   onRemove: (id: string) => void;
   onLaunchScrcpy?: (id: string) => void;
+  onLaunchAdbShell?: (id: string) => void;
   onDisconnect?: (id: string) => void;
 }
 
@@ -47,6 +48,7 @@ export default function DeviceCard({
   onConnect,
   onRemove,
   onLaunchScrcpy,
+  onLaunchAdbShell,
   onDisconnect,
 }: Props) {
   const status = statusConfig[device.connectionStatus];
@@ -134,6 +136,17 @@ export default function DeviceCard({
             title="显示设备屏幕 (scrcpy)"
           >
             <Monitor size={14} />
+          </button>
+        )}
+
+        {/* ADB Shell button (connected devices) */}
+        {isConnected && onLaunchAdbShell && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onLaunchAdbShell(device.id); }}
+            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-primary-improved/10 dark:hover:bg-blue-500/10 text-text-tertiary-light dark:text-slate-500 hover:text-primary-improved dark:hover:text-blue-400 transition-all"
+            title="打开 ADB Shell 终端"
+          >
+            <Terminal size={14} />
           </button>
         )}
 
