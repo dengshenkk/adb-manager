@@ -130,6 +130,23 @@ export default function App() {
     loadDevices();
   }, [loadDevices]);
 
+  // 窗口获得焦点时重新加载配置
+  useEffect(() => {
+    const handleFocus = async () => {
+      console.log('[Renderer] Window focused, reloading config...');
+      try {
+        await window.api.reloadConfig();
+        await loadDevices();
+        console.log('[Renderer] Config reloaded on focus');
+      } catch (err) {
+        console.error('[Renderer] Failed to reload config on focus:', err);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [loadDevices]);
+
   // USB 设备排在最前面
   const sortedDevices = useMemo(() => {
     return [...devices].sort((a, b) => {
