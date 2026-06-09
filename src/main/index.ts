@@ -87,6 +87,18 @@ async function createWindow(): Promise<void> {
     mainWindow = null;
   });
 
+  mainWindow.on('focus', async () => {
+    console.log('Window focused, reloading config...');
+    if (deviceManager) {
+      try {
+        await deviceManager.refreshDevices();
+        console.log('Config reloaded on focus');
+      } catch (err) {
+        console.error('Failed to reload config on focus:', err);
+      }
+    }
+  });
+
   await loadRenderer(mainWindow);
   console.log('Window loaded successfully');
 }

@@ -13,9 +13,12 @@ export interface ElectronApi {
   switchTo: (id: string) => Promise<SwitchResult>;
   connect: (id: string) => Promise<AdbResult>;
   disconnect: (id: string) => Promise<AdbResult>;
+  disconnectAll: () => Promise<AdbResult>;
+  switchToActive: () => Promise<AdbResult>;
   deactivate: () => Promise<AdbResult>;
   refreshStatus: () => Promise<DeviceState[]>;
   refreshDevices: () => Promise<DeviceState[]>;
+  reloadConfig: () => Promise<{ success: boolean }>;
   launchScrcpy: (id: string) => Promise<AdbResult>;
   launchAdbShell: (id: string, terminalApp: TerminalApp) => Promise<AdbResult>;
   // Theme API

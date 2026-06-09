@@ -82,4 +82,17 @@ export function registerIpcHandlers(manager: DeviceManager, store: IConfigStore)
     await store.save(config);
     return { success: true };
   });
+
+  ipcMain.handle('device:disconnectAll', async () => {
+    return manager.disconnectAll();
+  });
+
+  ipcMain.handle('device:switchToActive', async () => {
+    return manager.switchToActive();
+  });
+
+  ipcMain.handle('config:reload', async () => {
+    await manager.refreshDevices();
+    return { success: true };
+  });
 }

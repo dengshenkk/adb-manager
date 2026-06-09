@@ -216,6 +216,54 @@ export class DeviceManager {
     return result;
   }
 
+  /** Disconnect all network devices */
+  async disconnectAll(): Promise<AdbResult> {
+    const result = await this.adb.disconnectAll();
+
+    if (result.success) {
+      for (const device of this.devices) {
+        if (device.type === 'network') {
+          device.connectionStatus = 'disconnected';
+          device.isActive = false;
+        }
+      }
+      this.activeDeviceId = null;
+      await this.persist();
+      this.emit('devices-changed', this.devices);
+    }
+
+    return result;
+  }
+
+  /** Switch to the active device (reconnect if needed) */
+  async switchToActive(): Promise<AdbResult> {
+    if (!this.activeDeviceId) {
+      return { success: false, message: '没有活跃设备' };
+    }
+
+    const device = this.devices.find((d) => d.id === this.activeDeviceId);
+    if (!device) {
+      return { success: false, message: '活跃设备不存在' };
+    }
+
+    if (device.type === 'usb') {
+      return { success: true, message: `当前活跃设备: ${device.name} (USB)` };
+    }
+
+    if (device.connectionStatus === 'connected') {
+      return { success: true, message: `当前活跃设备: ${device.name} (已连接)` };
+    }
+
+    const result = await this.adb.connect(device.address, device.port);
+    if (result.success) {
+      device.connectionStatus = 'connected';
+      device.lastConnected = new Date().toISOString();
+      this.emit('devices-changed', this.devices);
+    }
+
+    return result;
+  }
+
   async launchScrcpy(id: string): Promise<AdbResult> {
     const device = this.devices.find((d) => d.id === id);
     if (!device) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw, Terminal, ChevronDown } from 'lucide-react';
+import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw, Terminal, ChevronDown, Power, Target } from 'lucide-react';
 import DeviceCard from './components/DeviceCard';
 import AddDeviceDialog from './components/AddDeviceDialog';
 import ConfirmDialog from './components/ConfirmDialog';
@@ -261,6 +261,35 @@ export default function App() {
     });
   }, [devices, loadDevices, addToast]);
 
+  const handleDisconnectAll = useCallback(() => {
+    setConfirm({
+      open: true,
+      title: '断开所有连接',
+      message: '确定要断开所有设备的连接吗？',
+      danger: true,
+      onConfirm: async () => {
+        try {
+          const result = await window.api.disconnectAll();
+          addToast(result.success ? 'success' : 'error', result.message);
+          await loadDevices();
+        } catch (err: any) {
+          addToast('error', err.message);
+        }
+        setConfirm(prev => ({ ...prev, open: false }));
+      },
+    });
+  }, [loadDevices, addToast]);
+
+  const handleSwitchToActive = useCallback(async () => {
+    try {
+      const result = await window.api.switchToActive();
+      addToast(result.success ? 'success' : 'error', result.message);
+      await loadDevices();
+    } catch (err: any) {
+      addToast('error', err.message);
+    }
+  }, [loadDevices, addToast]);
+
   const activeDevice = devices.find((d) => d.isActive);
   const ThemeIcon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
 
@@ -282,6 +311,21 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2 no-drag">
+          <button
+            onClick={handleSwitchToActive}
+            disabled={!activeDevice}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+            title="切换到活跃设备"
+          >
+            <Target size={14} /> 活跃设备
+          </button>
+          <button
+            onClick={handleDisconnectAll}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium transition-colors"
+            title="断开所有连接"
+          >
+            <Power size={14} /> 断开所有
+          </button>
           <div className="relative">
             <button
               onClick={() => { setShowTerminalMenu(!showTerminalMenu); setShowThemeMenu(false); }}
