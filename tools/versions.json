@@ -1,0 +1,13 @@
+{
+  "adb": {
+    "version": "1.0.41",
+    "build": "37.0.0-14910828",
+    "source": "https://dl.google.com/android/repository/platform-tools-latest-darwin.zip",
+    "updated": "2026-06-09"
+  },
+  "scrcpy": {
+    "version": "3.3.3",
+    "source": "Homebrew",
+    "updated": "2026-06-09"
+  }
+}

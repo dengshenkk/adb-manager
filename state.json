@@ -1,8 +1,8 @@
 {
-  "task": "完成 ADB Manager 的 4 个任务",
-  "current_step": "初始化",
-  "status": "doing",
-  "progress": "0/4",
-  "last_update": "2026-06-09 14:30:00",
+  "task": "创建 tools 目录并检查 ADB 和 scrcpy 是否存在",
+  "current_step": "4",
+  "status": "done",
+  "progress": "4/4",
+  "last_update": "2026-06-09 15:36:00",
   "error": ""
 }

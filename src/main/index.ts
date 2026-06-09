@@ -106,7 +106,17 @@ async function createWindow(): Promise<void> {
 async function initApp(): Promise<void> {
   console.log('App ready, initializing...');
 
-  const adb = new AdbExecutor();
+  // 获取应用资源路径，用于查找打包的 ADB 工具
+  const resourcesPath = app.isPackaged
+    ? process.resourcesPath
+    : path.join(__dirname, '../../resources');
+
+  console.log(`Resources path: ${resourcesPath}`);
+  console.log(`App is packaged: ${app.isPackaged}`);
+
+  const adb = new AdbExecutor(undefined, resourcesPath);
+  console.log(`Using ADB path: ${adb.getAdbPath()}`);
+
   configStore = new JsonConfigStore();
   deviceManager = new DeviceManager(adb, configStore);
 

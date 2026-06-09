@@ -35,6 +35,13 @@
     "files": [
       "dist/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "tools",
+        "to": "tools",
+        "filter": ["**/*"]
+      }
+    ],
     "directories": {
       "output": "release"
     },
