@@ -302,6 +302,22 @@ export default function App() {
       const result = await window.api.switchToActive();
       addToast(result.success ? 'success' : 'error', result.message);
       await loadDevices();
+
+      // 滚动到活跃设备位置
+      if (result.success) {
+        setTimeout(() => {
+          // 重新查找活跃设备
+          const activeDeviceEl = document.querySelector('[data-is-active="true"]');
+          if (activeDeviceEl) {
+            activeDeviceEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // 添加高亮效果
+            activeDeviceEl.classList.add('ring-2', 'ring-green-500', 'ring-offset-2');
+            setTimeout(() => {
+              activeDeviceEl.classList.remove('ring-2', 'ring-green-500', 'ring-offset-2');
+            }, 2000);
+          }
+        }, 300);
+      }
     } catch (err: any) {
       addToast('error', err.message);
     }

@@ -68,6 +68,7 @@ export default function DeviceCard({
 
   return (
     <div
+      data-is-active={isActive.toString()}
       onClick={() => isClickable && onSwitch(device.id)}
       className={`
         group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
