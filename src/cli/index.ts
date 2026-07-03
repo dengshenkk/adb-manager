@@ -7,7 +7,7 @@
  * Reuses the framework-agnostic DeviceManager from src/core/.
  *
  * Usage:
- *   adb-manage [command] [options]
+ *   adb-manager [command] [options]
  */
 
 import { Command } from 'commander';
@@ -37,9 +37,9 @@ async function main(): Promise<void> {
   const program = new Command();
 
   program
-    .name('adb-manage')
+    .name('adb-manager')
     .description('跨平台 ADB 连接管理器 CLI')
-    .version('1.1.0')
+    .version('0.0.1')
     .option('--json', '以 JSON 格式输出（适合脚本管道）', () => { globalOptions.json = true; });
 
   // ── list: 列出所有设备 ─────────────────────────────

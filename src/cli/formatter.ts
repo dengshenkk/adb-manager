@@ -61,7 +61,7 @@ export function formatDeviceList(
   }
 
   if (devices.length === 0) {
-    return '\x1b[33m没有找到设备。使用 adb-manage add <address> [port] 添加网络设备。\x1b[0m\n';
+    return '\x1b[33m没有找到设备。使用 adb-manager add <address> [port] 添加网络设备。\x1b[0m\n';
   }
 
   const lines: string[] = [];
@@ -101,7 +101,7 @@ export function formatDeviceDetail(
   }
 
   if (!device) {
-    return '\x1b[33m没有活跃设备。使用 adb-manage switch <id> 切换设备。\x1b[0m\n';
+    return '\x1b[33m没有活跃设备。使用 adb-manager switch <id> 切换设备。\x1b[0m\n';
   }
 
   const lines: string[] = [];
