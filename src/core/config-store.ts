@@ -29,7 +29,7 @@ export class JsonConfigStore implements IConfigStore {
 
   constructor(configDir?: string) {
     const dir = configDir || this.getDefaultConfigDir();
-    this.configPath = join(dir, 'adb-manager.json');
+    this.configPath = join(dir, 'config.json');
   }
 
   getConfigPath(): string {
@@ -71,12 +71,6 @@ export class JsonConfigStore implements IConfigStore {
 
   private getDefaultConfigDir(): string {
     const home = process.env.HOME || process.env.USERPROFILE || '.';
-    if (process.platform === 'darwin') {
-      return join(home, 'Library', 'Application Support', 'adb-manager');
-    }
-    if (process.platform === 'win32') {
-      return join(process.env.APPDATA || join(home, 'AppData', 'Roaming'), 'adb-manager');
-    }
     return join(home, '.config', 'adb-manager');
   }
 }

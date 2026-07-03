@@ -3,15 +3,19 @@
   "version": "1.1.0",
   "description": "Cross-platform ADB connection manager",
   "main": "dist/main/index.js",
+  "bin": {
+    "adb-manage": "./dist/cli/index.js"
+  },
   "scripts": {
     "dev": "concurrently -n renderer,electron \"vite\" \"wait-on http://localhost:5173 && tsc -p tsconfig.main.json && electron .\"",
     "build:renderer": "vite build",
-    "build:main": "tsc -p tsconfig.main.json",
+    "build:main": "tsc -p tsconfig.main.json && chmod +x dist/cli/index.js",
     "build": "npm run build:renderer && npm run build:main",
     "pack": "npm run build && electron-builder",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/inquirer": "^8.2.13",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
@@ -24,6 +28,7 @@
     "postcss": "^8.4.33",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sharp": "^0.35.2",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
@@ -32,6 +37,7 @@
   "build": {
     "appId": "com.adb-manager.app",
     "productName": "ADB Manager",
+    "icon": "build/icon.png",
     "files": [
       "dist/**/*"
     ],
@@ -39,7 +45,9 @@
       {
         "from": "tools",
         "to": "tools",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "directories": {
@@ -54,5 +62,15 @@
     "linux": {
       "target": "AppImage"
     }
+  },
+  "files": [
+    "dist/cli/**/*",
+    "dist/core/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "commander": "^15.0.0",
+    "inquirer": "^8.2.7"
   }
 }

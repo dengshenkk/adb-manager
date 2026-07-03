@@ -7,3 +7,5 @@ release/
 .playwright-mcp/
 .vscode/
 .idea/
+.claude/
+.codegraph/

@@ -8,5 +8,5 @@
     "declaration": false,
     "declarationMap": false
   },
-  "include": ["src/main/**/*", "src/core/**/*"]
+  "include": ["src/main/**/*", "src/core/**/*", "src/cli/**/*"]
 }

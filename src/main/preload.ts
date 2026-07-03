@@ -25,6 +25,8 @@ export interface ElectronApi {
   setTheme: (theme: Theme) => Promise<{ success: boolean }>;
   getTerminalApp: () => Promise<TerminalApp>;
   setTerminalApp: (terminalApp: TerminalApp) => Promise<{ success: boolean }>;
+  /** 注册配置文件变更监听（CLI 修改后自动刷新） */
+  onConfigChanged: (callback: () => void) => () => void;
 }
 
 const api: ElectronApi = {
@@ -47,6 +49,11 @@ const api: ElectronApi = {
   setTheme: (theme) => ipcRenderer.invoke('config:setTheme', theme),
   getTerminalApp: () => ipcRenderer.invoke('config:getTerminalApp'),
   setTerminalApp: (terminalApp) => ipcRenderer.invoke('config:setTerminalApp', terminalApp),
+  onConfigChanged: (callback: () => void) => {
+    const handler = () => callback();
+    ipcRenderer.on('config:changed', handler);
+    return () => ipcRenderer.removeListener('config:changed', handler);
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

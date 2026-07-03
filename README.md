@@ -73,6 +73,4 @@ npm run pack         # 打包为平台安装包
 
 ## 配置文件位置
 
-- macOS: `~/Library/Application Support/adb-manager/adb-manager.json`
-- Windows: `%APPDATA%/adb-manager/adb-manager.json`
-- Linux: `~/.config/adb-manager/adb-manager.json`
+`~/.config/adb-manager/config.json`

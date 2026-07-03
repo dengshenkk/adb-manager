@@ -4,7 +4,7 @@
 
 import { app, BrowserWindow, nativeTheme } from 'electron';
 import path from 'path';
-import { existsSync } from 'fs';
+import { existsSync, watchFile, unwatchFile } from 'fs';
 import { createConnection } from 'net';
 import { DeviceManager, AdbExecutor, JsonConfigStore } from '../core';
 import { registerIpcHandlers } from './ipc-handlers';
@@ -127,7 +127,46 @@ async function initApp(): Promise<void> {
   registerIpcHandlers(deviceManager, configStore);
   console.log('IPC handlers registered');
 
+  // 监听配置文件变更（CLI 修改后自动刷新）
+  setupConfigWatcher(configStore);
+
   await createWindow();
+}
+
+/**
+ * 监听配置文件变更，CLI 修改后自动刷新设备状态
+ */
+function setupConfigWatcher(store: JsonConfigStore): void {
+  const configPath = store.getConfigPath();
+  console.log(`Setting up config watcher: ${configPath}`);
+
+  // 在初始加载完成后再启动监听，避免首次写入触发刷新
+  setTimeout(() => {
+    if (!existsSync(configPath)) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    watchFile(configPath, { interval: 1000 }, async (curr, prev) => {
+      // 防止 GUI 自身写入时重复刷新
+      if (curr.mtimeMs === prev.mtimeMs) return;
+
+      // 防抖：短时间内多次变更只刷新一次
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(async () => {
+        console.log('Config file changed, refreshing devices...');
+        if (deviceManager && mainWindow && !mainWindow.isDestroyed()) {
+          try {
+            await deviceManager.refreshDevices();
+            // 通知渲染进程刷新 UI
+            mainWindow.webContents.send('config:changed');
+            console.log('Devices refreshed after config change');
+          } catch (err) {
+            console.error('Failed to refresh after config change:', err);
+          }
+        }
+      }, 500);
+    });
+  }, 2000);
 }
 
 app.whenReady().then(initApp).catch((e) => {
@@ -137,6 +176,10 @@ app.whenReady().then(initApp).catch((e) => {
 
 app.on('window-all-closed', () => {
   console.log('All windows closed');
+  // 停止文件监听
+  if (configStore) {
+    unwatchFile(configStore.getConfigPath());
+  }
   if (process.platform !== 'darwin') app.quit();
 });
 

@@ -1,0 +1,116 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 阴影 -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="12" stdDeviation="28" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+
+    <!-- 背景渐变 -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#1E1B4B"/>
+    </linearGradient>
+
+    <!-- 光泽效果 -->
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- 手机边框渐变 -->
+    <linearGradient id="phoneBorder" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E5E7EB"/>
+      <stop offset="50%" stop-color="#9CA3AF"/>
+      <stop offset="100%" stop-color="#6B7280"/>
+    </linearGradient>
+
+    <!-- 屏幕渐变 -->
+    <linearGradient id="screenGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- 连接线渐变 -->
+    <linearGradient id="cableGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <!-- 插头渐变 -->
+    <linearGradient id="plugGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+
+    <!-- Squircle (超级椭圆) clip -->
+    <clipPath id="squircle">
+      <rect x="100" y="100" width="824" height="824" rx="185.4"/>
+    </clipPath>
+  </defs>
+
+  <!-- 投影 -->
+  <rect x="100" y="100" width="824" height="824" rx="185.4" fill="rgba(0,0,0,0.01)" filter="url(#shadow)"/>
+
+  <!-- 背景 squircle -->
+  <rect x="100" y="100" width="824" height="824" rx="185.4" fill="url(#bgGrad)"/>
+
+  <!-- 背景光效 -->
+  <rect x="100" y="100" width="824" height="824" rx="185.4" fill="url(#gloss)" clip-path="url(#squircle)"/>
+
+  <!-- ========== 主体内容 ========== -->
+
+  <!-- 手机主体 -->
+  <g transform="translate(512, 490)">
+    <!-- 手机外框 -->
+    <rect x="-120" y="-200" width="240" height="400" rx="36" stroke="url(#phoneBorder)" stroke-width="10" fill="none"/>
+
+    <!-- 手机侧边按键（左） -->
+    <rect x="-130" y="-100" width="10" height="40" rx="5" fill="#9CA3AF"/>
+    <rect x="-130" y="-40" width="10" height="40" rx="5" fill="#9CA3AF"/>
+
+    <!-- 手机侧边按键（右/电源） -->
+    <rect x="120" y="-140" width="10" height="60" rx="5" fill="#9CA3AF"/>
+
+    <!-- 屏幕 -->
+    <rect x="-105" y="-185" width="210" height="355" rx="24" fill="#111827"/>
+
+    <!-- 屏幕内容 - Android 机器人风格 -->
+    <!-- 屏幕顶部状态栏 -->
+    <rect x="-90" y="-172" width="180" height="8" rx="4" fill="#34D399" opacity="0.6"/>
+
+    <!-- 屏幕上的 Circle 脉冲动画 (代表连接状态) -->
+    <circle cx="0" cy="-80" r="40" fill="none" stroke="#34D399" stroke-width="3" opacity="0.3"/>
+    <circle cx="0" cy="-80" r="25" fill="none" stroke="#34D399" stroke-width="4" opacity="0.5"/>
+    <circle cx="0" cy="-80" r="12" fill="#34D399" opacity="0.9"/>
+
+    <!-- 屏幕下方文字栏 -->
+    <rect x="-70" y="70" width="140" height="6" rx="3" fill="#34D399" opacity="0.4"/>
+    <rect x="-45" y="84" width="90" height="4" rx="2" fill="#6B7280" opacity="0.6"/>
+
+    <!-- 屏幕底部 Home 指示条 -->
+    <rect x="-40" y="150" width="80" height="6" rx="3" fill="#4B5563"/>
+  </g>
+
+  <!-- 数据线 - 从手机底部延伸到右侧插头 -->
+  <g>
+    <!-- 线缆 -->
+    <path d="M512 690 L512 740 Q512 760 532 760 L620 760 Q640 760 640 780 L640 820"
+          fill="none" stroke="url(#cableGrad)" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- USB-C 插头 -->
+    <rect x="625" y="810" width="30" height="36" rx="6" fill="url(#plugGrad)"/>
+    <rect x="625" y="810" width="30" height="36" rx="6" fill="none" stroke="#D97706" stroke-width="2"/>
+    <rect x="632" y="810" width="16" height="6" rx="2" fill="#92400E"/>
+
+    <!-- 插头尖端 -->
+    <rect x="628" y="840" width="24" height="8" rx="2" fill="#B45309"/>
+  </g>
+
+  <!-- ADB 文字标识 - 屏幕上方 -->
+  <g transform="translate(512, 200)" opacity="0.6">
+    <text x="0" y="0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+          font-size="48" font-weight="700" fill="#FFFFFF" letter-spacing="8">ADB</text>
+  </g>
+
+</svg>

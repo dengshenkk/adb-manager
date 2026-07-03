@@ -27,6 +27,8 @@ export interface ElectronApi {
   // Terminal API
   getTerminalApp: () => Promise<TerminalApp>;
   setTerminalApp: (terminalApp: TerminalApp) => Promise<{ success: boolean }>;
+  // 配置文件变更监听（CLI 修改后自动刷新）
+  onConfigChanged: (callback: () => void) => () => void;
   // USB设备管理API
   connectUSBDevice: (id: string) => Promise<USBConnectionResult>;
   disconnectUSBDevice: (id: string) => Promise<USBConnectionResult>;

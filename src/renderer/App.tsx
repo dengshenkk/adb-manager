@@ -147,6 +147,20 @@ export default function App() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [loadDevices]);
 
+  // 监听配置文件变更（来自 CLI 的修改）
+  useEffect(() => {
+    const unsubscribe = window.api.onConfigChanged(async () => {
+      console.log('[Renderer] Config changed externally, reloading...');
+      try {
+        await window.api.reloadConfig();
+        await loadDevices();
+      } catch (err) {
+        console.error('[Renderer] Failed to reload after config change:', err);
+      }
+    });
+    return unsubscribe;
+  }, [loadDevices]);
+
   // USB 设备排在最前面
   const sortedDevices = useMemo(() => {
     return [...devices].sort((a, b) => {
