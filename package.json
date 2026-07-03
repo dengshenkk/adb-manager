@@ -4,7 +4,7 @@
   "description": "Cross-platform ADB connection manager",
   "main": "dist/cli/index.js",
   "bin": {
-    "adb-manager": "./dist/cli/index.js"
+    "adb-manager": "dist/cli/index.js"
   },
   "scripts": {
     "dev": "concurrently -n renderer,electron \"vite\" \"wait-on http://localhost:5173 && tsc -p tsconfig.main.json && electron .\"",
