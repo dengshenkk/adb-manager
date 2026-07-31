@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronDown, Check } from 'lucide-react';
 import { UNCATEGORIZED } from '../../core/types';
 
 interface Props {
@@ -8,16 +8,49 @@ interface Props {
   existingCategories: string[];
 }
 
+/** 输入框清除按钮：有值时显示在右侧，点击清空内容 */
+function ClearInputButton({ show, onClear, className }: { show: boolean; onClear: () => void; className?: string }) {
+  if (!show) return null;
+  return (
+    <button
+      type="button"
+      onClick={onClear}
+      className={`absolute top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors ${className || ''}`}
+      title="清除"
+    >
+      <X size={14} />
+    </button>
+  );
+}
+
+const inputClass =
+  'w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors';
+
 export default function AddDeviceDialog({ onAdd, onClose, existingCategories }: Props) {
   const [address, setAddress] = useState('');
   const [port, setPort] = useState('5555');
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // 已有分类下拉选项：排除「未分类」；仅在用户输入时按内容过滤，否则展示全部
+  const categoryOptions = existingCategories.filter((c) => {
+    if (c === UNCATEGORIZED) return false;
+    if (!isFiltering) return true;
+    return c.toLowerCase().includes(category.trim().toLowerCase());
+  });
+
+  const selectCategory = (value: string) => {
+    setCategory(value);
+    setCategoryOpen(false);
+    setIsFiltering(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,29 +84,64 @@ export default function AddDeviceDialog({ onAdd, onClose, existingCategories }: 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">IP 地址 *</label>
-            <input ref={inputRef} type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="192.168.1.100"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
+            <div className="relative">
+              <input ref={inputRef} type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="192.168.1.100" className={`${inputClass} pr-8`} />
+              <ClearInputButton show={!!address} onClear={() => setAddress('')} className="right-2.5" />
+            </div>
           </div>
           <div>
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">端口 *</label>
-            <input type="text" value={port} onChange={(e) => setPort(e.target.value)} placeholder="5555"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
+            <div className="relative">
+              <input type="text" value={port} onChange={(e) => setPort(e.target.value)} placeholder="5555" className={`${inputClass} pr-8`} />
+              <ClearInputButton show={!!port} onClear={() => setPort('5555')} className="right-2.5" />
+            </div>
           </div>
           <div>
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">别名（可选）</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="如：测试手机 A"
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
+            <div className="relative">
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="如：测试手机 A" className={`${inputClass} pr-8`} />
+              <ClearInputButton show={!!name} onClear={() => setName('')} className="right-2.5" />
+            </div>
           </div>
           <div>
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">分类（可选）</label>
-            <input list="device-categories" type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder={`默认：${UNCATEGORIZED}`}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
-            <datalist id="device-categories">
-              <option value={UNCATEGORIZED} />
-              {existingCategories.filter((c) => c !== UNCATEGORIZED).map((c) => (
-                <option key={c} value={c} />
-              ))}
-            </datalist>
+            <div className="relative">
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => { setCategory(e.target.value); setIsFiltering(true); setCategoryOpen(true); }}
+                onFocus={() => setCategoryOpen(true)}
+                onClick={() => setCategoryOpen(true)}
+                onBlur={() => setTimeout(() => setCategoryOpen(false), 150)}
+                placeholder={`默认：${UNCATEGORIZED}`}
+                className={`${inputClass} pr-12`}
+              />
+              <ClearInputButton show={!!category} onClear={() => { setCategory(''); setIsFiltering(false); }} className="right-8" />
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              {categoryOpen && (
+                <div className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg py-1">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); selectCategory(UNCATEGORIZED); }}
+                    className="w-full flex items-center justify-between px-3 py-1.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+                  >
+                    <span>{UNCATEGORIZED}</span>
+                    {(!category || category === UNCATEGORIZED) && <Check size={14} className="text-primary-improved dark:text-blue-400" />}
+                  </button>
+                  {categoryOptions.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); selectCategory(c); }}
+                      className="w-full flex items-center justify-between px-3 py-1.5 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+                    >
+                      <span>{c}</span>
+                      {category === c && <Check size={14} className="text-primary-improved dark:text-blue-400" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">

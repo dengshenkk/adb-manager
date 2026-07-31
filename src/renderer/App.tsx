@@ -471,8 +471,8 @@ export default function App() {
           </div>
         ) : (
           <>
-            {/* 分类 tab 栏：过滤 + 连接数摘要 */}
-            <div className="flex items-center gap-1.5 mb-4 overflow-x-auto">
+            {/* 分类 tab 栏：过滤 + 连接数摘要，sticky 固定在顶部不随列表滚动 */}
+            <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-2 mb-4 flex items-center gap-1.5 overflow-x-auto bg-surface-light dark:bg-slate-950">
               {tabStats.map((tab) => (
                 <button
                   key={tab.key}
@@ -480,7 +480,7 @@ export default function App() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
                     activeCategory === tab.key
                       ? 'bg-primary-improved text-white'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {tab.label}
