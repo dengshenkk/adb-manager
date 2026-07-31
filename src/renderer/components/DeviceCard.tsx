@@ -1,4 +1,4 @@
-import { Wifi, WifiOff, Trash2, Loader2, Usb, Monitor, Unplug, Link, Terminal } from 'lucide-react';
+import { Wifi, WifiOff, Trash2, Loader2, Usb, Monitor, Unplug, Link, Terminal, Pencil } from 'lucide-react';
 import type { DeviceState } from '../../core/types';
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
   onSwitch: (id: string) => void;
   onConnect?: (id: string) => void;
   onRemove: (id: string) => void;
+  onEdit?: (id: string) => void;
   onLaunchScrcpy?: (id: string) => void;
   onLaunchAdbShell?: (id: string) => void;
   onDisconnect?: (id: string) => void;
@@ -47,6 +48,7 @@ export default function DeviceCard({
   onSwitch,
   onConnect,
   onRemove,
+  onEdit,
   onLaunchScrcpy,
   onLaunchAdbShell,
   onDisconnect,
@@ -159,6 +161,17 @@ export default function DeviceCard({
             title="断开连接"
           >
             <Unplug size={14} />
+          </button>
+        )}
+
+        {/* Edit button (network devices only) */}
+        {!isUsb && onEdit && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(device.id); }}
+            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-primary-improved/10 dark:hover:bg-blue-500/10 text-text-tertiary-light dark:text-slate-500 hover:text-primary-improved dark:hover:text-blue-400 transition-all"
+            title="编辑设备"
+          >
+            <Pencil size={14} />
           </button>
         )}
 

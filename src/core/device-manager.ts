@@ -82,6 +82,44 @@ export class DeviceManager {
     this.emit('devices-changed', this.devices);
   }
 
+  /** Update a network device's fields (name / category / address / port) */
+  async updateDevice(
+    id: string,
+    updates: { name?: string; address?: string; port?: number; category?: string },
+  ): Promise<DeviceState> {
+    const device = this.devices.find((d) => d.id === id);
+    if (!device) throw new Error(`设备 ${id} 不存在`);
+    if (device.type === 'usb') throw new Error('USB 设备不能编辑');
+
+    const newAddress = updates.address ?? device.address;
+    const newPort = updates.port ?? device.port;
+    const newId = `${newAddress}:${newPort}`;
+
+    // 修改地址/端口导致 id 变化时，检查与现有设备冲突
+    if (newId !== id && this.devices.some((d) => d.id === newId)) {
+      throw new Error(`设备 ${newId} 已存在`);
+    }
+
+    device.id = newId;
+    device.address = newAddress;
+    device.port = newPort;
+    if (updates.name !== undefined) device.name = updates.name;
+    if (updates.category !== undefined) device.category = updates.category;
+
+    if (newId !== id) {
+      // 地址/端口变化后旧连接不再有效，重置连接状态并取消活跃标记
+      device.connectionStatus = 'disconnected';
+      device.isActive = false;
+      if (this.activeDeviceId === id) {
+        this.activeDeviceId = null;
+      }
+    }
+
+    await this.persist();
+    this.emit('devices-changed', this.devices);
+    return device;
+  }
+
   /** Connect a network device without switching to it */
   async connectDevice(id: string): Promise<AdbResult> {
     const device = this.devices.find((d) => d.id === id);

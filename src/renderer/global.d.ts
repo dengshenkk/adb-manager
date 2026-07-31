@@ -9,6 +9,7 @@ export interface ElectronApi {
   listDevices: () => Promise<DeviceState[]>;
   getActiveDevice: () => Promise<DeviceState | null>;
   addDevice: (address: string, port: number, name?: string, category?: string) => Promise<DeviceState>;
+  updateDevice: (id: string, updates: { name?: string; address?: string; port?: number; category?: string }) => Promise<DeviceState>;
   removeDevice: (id: string) => Promise<{ success: boolean }>;
   switchTo: (id: string) => Promise<SwitchResult>;
   connect: (id: string) => Promise<AdbResult>;

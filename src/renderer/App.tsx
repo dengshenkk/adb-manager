@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw, Terminal, ChevronDown, Power, Target } from 'lucide-react';
 import DeviceCard from './components/DeviceCard';
 import AddDeviceDialog from './components/AddDeviceDialog';
+import EditDeviceDialog from './components/EditDeviceDialog';
 import ConfirmDialog from './components/ConfirmDialog';
 import Toast from './components/Toast';
 import type { DeviceState, SwitchResult, Theme, TerminalApp } from '../core/types';
@@ -40,6 +41,7 @@ export default function App() {
     onConfirm: () => {},
   });
   const [activeCategory, setActiveCategory] = useState('all');
+  const [editingDevice, setEditingDevice] = useState<DeviceState | null>(null);
 
   const addToast = useCallback((type: ToastMessage['type'], message: string) => {
     const id = Date.now() + Math.random();
@@ -233,6 +235,28 @@ export default function App() {
       addToast('error', err.message);
     }
   }, [loadDevices, addToast]);
+
+  const handleEdit = useCallback((id: string) => {
+    const device = devices.find((d) => d.id === id);
+    if (device) setEditingDevice(device);
+  }, [devices]);
+
+  const handleSaveEdit = useCallback(async (address: string, port: number, name: string, category: string) => {
+    if (!editingDevice) return;
+    try {
+      await window.api.updateDevice(editingDevice.id, {
+        address,
+        port,
+        name: name || undefined,
+        category: category || undefined,
+      });
+      addToast('success', '设备已更新');
+      setEditingDevice(null);
+      await loadDevices();
+    } catch (err: any) {
+      addToast('error', err.message);
+    }
+  }, [editingDevice, loadDevices, addToast]);
 
   const handleRemove = useCallback((id: string) => {
     const device = devices.find(d => d.id === id);
@@ -505,6 +529,7 @@ export default function App() {
                     onSwitch={handleSwitch}
                     onConnect={handleConnect}
                     onRemove={handleRemove}
+                    onEdit={handleEdit}
                     onLaunchScrcpy={handleLaunchScrcpy}
                     onLaunchAdbShell={handleLaunchAdbShell}
                     onDisconnect={handleDisconnect}
@@ -517,6 +542,14 @@ export default function App() {
       </main>
 
       {showAddDialog && <AddDeviceDialog onAdd={handleAdd} onClose={() => setShowAddDialog(false)} existingCategories={categories} />}
+      {editingDevice && (
+        <EditDeviceDialog
+          device={editingDevice}
+          existingCategories={categories}
+          onSave={handleSaveEdit}
+          onClose={() => setEditingDevice(null)}
+        />
+      )}
       {confirm.open && (
         <ConfirmDialog
           title={confirm.title}
