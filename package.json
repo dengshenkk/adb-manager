@@ -2,7 +2,7 @@
   "name": "adb-manager",
   "version": "1.2.0",
   "description": "Cross-platform ADB connection manager",
-  "main": "dist/cli/index.js",
+  "main": "dist/main/index.js",
   "bin": {
     "adb-manager": "dist/cli/index.js"
   },
