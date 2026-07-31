@@ -12,6 +12,7 @@ export interface DeviceInfo {
   address: string;      // IP address (empty for USB devices)
   port: number;         // ADB port (0 for USB devices)
   type: 'usb' | 'network';  // Device connection type
+  category?: string;    // 分类，空值/缺省 = 未分类
 }
 
 /** USB设备连接状态 */
@@ -60,6 +61,9 @@ export interface AdbDeviceRaw {
   status: string;        // "device", "offline", "unauthorized"
   type: 'usb' | 'network';  // Determined by whether serial contains ":"
 }
+
+/** 未分类的显示标签（category 为空/缺省时归入此类） */
+export const UNCATEGORIZED = '未分类';
 
 /** Theme setting */
 export type Theme = 'light' | 'dark' | 'system';

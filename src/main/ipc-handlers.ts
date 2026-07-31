@@ -16,8 +16,8 @@ export function registerIpcHandlers(manager: DeviceManager, store: IConfigStore)
     return manager.getActiveDevice();
   });
 
-  ipcMain.handle('device:add', async (_event, address: string, port: number, name?: string) => {
-    return manager.addDevice(address, port, name);
+  ipcMain.handle('device:add', async (_event, address: string, port: number, name?: string, category?: string) => {
+    return manager.addDevice(address, port, name, category);
   });
 
   ipcMain.handle('device:remove', async (_event, id: string) => {

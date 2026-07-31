@@ -58,7 +58,7 @@ export class JsonConfigStore implements IConfigStore {
   }
 
   /** Create a new DeviceInfo with auto-generated id (always network type) */
-  static createDevice(address: string, port: number, name?: string): DeviceInfo {
+  static createDevice(address: string, port: number, name?: string, category?: string): DeviceInfo {
     const id = `${address}:${port}`;
     return {
       id,
@@ -66,6 +66,7 @@ export class JsonConfigStore implements IConfigStore {
       address,
       port,
       type: 'network',
+      category: category || '',
     };
   }
 

@@ -48,8 +48,8 @@ export class DeviceManager {
     return this.devices.find((d) => d.isActive) || null;
   }
 
-  async addDevice(address: string, port: number, name?: string): Promise<DeviceState> {
-    const info = JsonConfigStore.createDevice(address, port, name);
+  async addDevice(address: string, port: number, name?: string, category?: string): Promise<DeviceState> {
+    const info = JsonConfigStore.createDevice(address, port, name, category);
 
     if (this.devices.some((d) => d.id === info.id)) {
       throw new Error(`设备 ${info.id} 已存在`);
@@ -367,7 +367,7 @@ export class DeviceManager {
   private async persist(): Promise<void> {
     const networkDevices = this.devices
       .filter((d) => d.type === 'network')
-      .map(({ id, name, address, port, type }) => ({ id, name, address, port, type }));
+      .map(({ id, name, address, port, type, category }) => ({ id, name, address, port, type, category }));
 
     const config = await this.store.load();
     await this.store.save({

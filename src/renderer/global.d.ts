@@ -8,7 +8,7 @@ import type { DeviceState, SwitchResult, AdbResult, Theme, TerminalApp, USBConne
 export interface ElectronApi {
   listDevices: () => Promise<DeviceState[]>;
   getActiveDevice: () => Promise<DeviceState | null>;
-  addDevice: (address: string, port: number, name?: string) => Promise<DeviceState>;
+  addDevice: (address: string, port: number, name?: string, category?: string) => Promise<DeviceState>;
   removeDevice: (id: string) => Promise<{ success: boolean }>;
   switchTo: (id: string) => Promise<SwitchResult>;
   connect: (id: string) => Promise<AdbResult>;

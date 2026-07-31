@@ -8,7 +8,7 @@ import type { DeviceState, SwitchResult, AdbResult, Theme, TerminalApp } from '.
 export interface ElectronApi {
   listDevices: () => Promise<DeviceState[]>;
   getActiveDevice: () => Promise<DeviceState | null>;
-  addDevice: (address: string, port: number, name?: string) => Promise<DeviceState>;
+  addDevice: (address: string, port: number, name?: string, category?: string) => Promise<DeviceState>;
   removeDevice: (id: string) => Promise<{ success: boolean }>;
   switchTo: (id: string) => Promise<SwitchResult>;
   connect: (id: string) => Promise<AdbResult>;
@@ -32,7 +32,7 @@ export interface ElectronApi {
 const api: ElectronApi = {
   listDevices: () => ipcRenderer.invoke('device:list'),
   getActiveDevice: () => ipcRenderer.invoke('device:active'),
-  addDevice: (address, port, name) => ipcRenderer.invoke('device:add', address, port, name),
+  addDevice: (address, port, name, category) => ipcRenderer.invoke('device:add', address, port, name, category),
   removeDevice: (id) => ipcRenderer.invoke('device:remove', id),
   switchTo: (id) => ipcRenderer.invoke('device:switch', id),
   connect: (id) => ipcRenderer.invoke('device:connect', id),

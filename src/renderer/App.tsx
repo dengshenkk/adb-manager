@@ -5,7 +5,7 @@ import AddDeviceDialog from './components/AddDeviceDialog';
 import ConfirmDialog from './components/ConfirmDialog';
 import Toast from './components/Toast';
 import type { DeviceState, SwitchResult, Theme, TerminalApp } from '../core/types';
-import { TERMINAL_APP_LABELS } from '../core/types';
+import { UNCATEGORIZED, TERMINAL_APP_LABELS } from '../core/types';
 
 interface ToastMessage {
   id: number;
@@ -39,6 +39,7 @@ export default function App() {
     danger: false,
     onConfirm: () => {},
   });
+  const [activeCategory, setActiveCategory] = useState('all');
 
   const addToast = useCallback((type: ToastMessage['type'], message: string) => {
     const id = Date.now() + Math.random();
@@ -170,6 +171,32 @@ export default function App() {
     });
   }, [devices]);
 
+  // 提取所有分类（含默认未分类，USB 设备无 category 归入未分类）
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    for (const d of devices) set.add(d.category || UNCATEGORIZED);
+    return Array.from(set);
+  }, [devices]);
+
+  // tab 栏统计：[全部] + 每个分类的连接数摘要
+  const tabStats = useMemo(() => {
+    const connectedCount = (list: DeviceState[]) => list.filter((d) => d.connectionStatus === 'connected').length;
+    const allTab = { key: 'all', label: '全部', total: devices.length, connected: connectedCount(devices) };
+    return [
+      allTab,
+      ...categories.map((cat) => {
+        const list = devices.filter((d) => (d.category || UNCATEGORIZED) === cat);
+        return { key: cat, label: cat, total: list.length, connected: connectedCount(list) };
+      }),
+    ];
+  }, [devices, categories]);
+
+  // 当前选中分类下的可见设备
+  const visibleDevices = useMemo(() => {
+    if (activeCategory === 'all') return sortedDevices;
+    return sortedDevices.filter((d) => (d.category || UNCATEGORIZED) === activeCategory);
+  }, [sortedDevices, activeCategory]);
+
   const handleSwitch = useCallback(async (id: string) => {
     setSwitching(id);
     try {
@@ -196,10 +223,11 @@ export default function App() {
     }
   }, [loadDevices, addToast]);
 
-  const handleAdd = useCallback(async (address: string, port: number, name: string) => {
+  const handleAdd = useCallback(async (address: string, port: number, name: string, category: string) => {
     try {
-      await window.api.addDevice(address, port, name || undefined);
+      await window.api.addDevice(address, port, name || undefined, category || undefined);
       addToast('success', `已添加 ${address}:${port}`);
+      setActiveCategory('all'); // 添加成功后切回全部，确保新设备可见
       await loadDevices();
     } catch (err: any) {
       addToast('error', err.message);
@@ -442,26 +470,53 @@ export default function App() {
             </button>
           </div>
         ) : (
-          <div className="grid gap-3">
-            {sortedDevices.map((device) => (
-              <DeviceCard
-                key={device.id}
-                device={device}
-                switching={switching === device.id}
-                connecting={connecting === device.id}
-                onSwitch={handleSwitch}
-                onConnect={handleConnect}
-                onRemove={handleRemove}
-                onLaunchScrcpy={handleLaunchScrcpy}
-                onLaunchAdbShell={handleLaunchAdbShell}
-                onDisconnect={handleDisconnect}
-              />
-            ))}
-          </div>
+          <>
+            {/* 分类 tab 栏：过滤 + 连接数摘要 */}
+            <div className="flex items-center gap-1.5 mb-4 overflow-x-auto">
+              {tabStats.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveCategory(tab.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
+                    activeCategory === tab.key
+                      ? 'bg-primary-improved text-white'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {tab.label}
+                  <span className={`text-xs ${activeCategory === tab.key ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
+                    {tab.connected}/{tab.total}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {visibleDevices.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500 gap-3">
+                <p className="text-sm">当前分类暂无设备</p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {visibleDevices.map((device) => (
+                  <DeviceCard
+                    key={device.id}
+                    device={device}
+                    switching={switching === device.id}
+                    connecting={connecting === device.id}
+                    onSwitch={handleSwitch}
+                    onConnect={handleConnect}
+                    onRemove={handleRemove}
+                    onLaunchScrcpy={handleLaunchScrcpy}
+                    onLaunchAdbShell={handleLaunchAdbShell}
+                    onDisconnect={handleDisconnect}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </main>
 
-      {showAddDialog && <AddDeviceDialog onAdd={handleAdd} onClose={() => setShowAddDialog(false)} />}
+      {showAddDialog && <AddDeviceDialog onAdd={handleAdd} onClose={() => setShowAddDialog(false)} existingCategories={categories} />}
       {confirm.open && (
         <ConfirmDialog
           title={confirm.title}

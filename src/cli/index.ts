@@ -164,14 +164,15 @@ async function main(): Promise<void> {
     .argument('<address>', 'IP 地址')
     .argument('[port]', 'ADB 端口号', '5555')
     .argument('[name]', '设备别名（默认使用 address:port）')
-    .action(async (address: string, port: string, name: string | undefined) => {
+    .argument('[category]', '设备分类（默认未分类）')
+    .action(async (address: string, port: string, name: string | undefined, category: string | undefined) => {
       try {
         const portNum = parseInt(port, 10);
         if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
           console.log(formatMessage('端口号必须为 1-65535 之间的数字', 'error', globalOptions));
           process.exit(1);
         }
-        const device = await manager.addDevice(address, portNum, name);
+        const device = await manager.addDevice(address, portNum, name, category);
         console.log(formatMessage(`设备已添加: ${device.name} (${device.id})`, 'success', globalOptions));
       } catch (err: any) {
         console.log(formatMessage(err.message, 'error', globalOptions));

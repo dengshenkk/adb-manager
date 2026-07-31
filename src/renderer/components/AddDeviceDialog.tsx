@@ -1,15 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { UNCATEGORIZED } from '../../core/types';
 
 interface Props {
-  onAdd: (address: string, port: number, name: string) => Promise<void>;
+  onAdd: (address: string, port: number, name: string, category: string) => Promise<void>;
   onClose: () => void;
+  existingCategories: string[];
 }
 
-export default function AddDeviceDialog({ onAdd, onClose }: Props) {
+export default function AddDeviceDialog({ onAdd, onClose, existingCategories }: Props) {
   const [address, setAddress] = useState('');
   const [port, setPort] = useState('5555');
   const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +28,7 @@ export default function AddDeviceDialog({ onAdd, onClose }: Props) {
 
     setSubmitting(true);
     try {
-      await onAdd(address.trim(), portNum, name.trim());
+      await onAdd(address.trim(), portNum, name.trim(), category.trim());
       onClose();
     } catch (err: any) {
       setError(err.message);
@@ -60,6 +63,17 @@ export default function AddDeviceDialog({ onAdd, onClose }: Props) {
             <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">别名（可选）</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="如：测试手机 A"
               className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">分类（可选）</label>
+            <input list="device-categories" type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder={`默认：${UNCATEGORIZED}`}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
+            <datalist id="device-categories">
+              <option value={UNCATEGORIZED} />
+              {existingCategories.filter((c) => c !== UNCATEGORIZED).map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
           </div>
           {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
