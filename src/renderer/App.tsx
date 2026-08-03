@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw, Terminal, ChevronDown, Power, Target } from 'lucide-react';
+import { Plus, RefreshCw, Wifi, WifiOff, Sun, Moon, Monitor, RotateCcw, Terminal, ChevronDown, Power, Target, Search, X } from 'lucide-react';
 import DeviceCard from './components/DeviceCard';
 import AddDeviceDialog from './components/AddDeviceDialog';
 import EditDeviceDialog from './components/EditDeviceDialog';
@@ -42,6 +42,7 @@ export default function App() {
   });
   const [activeCategory, setActiveCategory] = useState('all');
   const [editingDevice, setEditingDevice] = useState<DeviceState | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const addToast = useCallback((type: ToastMessage['type'], message: string) => {
     const id = Date.now() + Math.random();
@@ -193,11 +194,22 @@ export default function App() {
     ];
   }, [devices, categories]);
 
-  // 当前选中分类下的可见设备
+  // 当前选中分类 + 搜索词过滤后的可见设备
   const visibleDevices = useMemo(() => {
-    if (activeCategory === 'all') return sortedDevices;
-    return sortedDevices.filter((d) => (d.category || UNCATEGORIZED) === activeCategory);
-  }, [sortedDevices, activeCategory]);
+    const categoryFiltered =
+      activeCategory === 'all'
+        ? sortedDevices
+        : sortedDevices.filter((d) => (d.category || UNCATEGORIZED) === activeCategory);
+
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return categoryFiltered;
+    return categoryFiltered.filter((d) =>
+      d.name.toLowerCase().includes(q) ||
+      d.address.toLowerCase().includes(q) ||
+      String(d.port).includes(q) ||
+      (d.category || '').toLowerCase().includes(q)
+    );
+  }, [sortedDevices, activeCategory, searchQuery]);
 
   const handleSwitch = useCallback(async (id: string) => {
     setSwitching(id);
@@ -495,28 +507,51 @@ export default function App() {
           </div>
         ) : (
           <>
-            {/* 分类 tab 栏：过滤 + 连接数摘要，sticky 固定在顶部不随列表滚动 */}
-            <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-2 mb-4 flex items-center gap-1.5 overflow-x-auto bg-surface-light dark:bg-slate-950">
-              {tabStats.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveCategory(tab.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
-                    activeCategory === tab.key
-                      ? 'bg-primary-improved text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {tab.label}
-                  <span className={`text-xs ${activeCategory === tab.key ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
-                    {tab.connected}/{tab.total}
-                  </span>
-                </button>
-              ))}
+            {/* 搜索框 + 分类 tab 栏：一起 sticky 固定在顶部 */}
+            <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-2 mb-4 bg-surface-light dark:bg-slate-950 space-y-2">
+              {/* 搜索设备 */}
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索设备（名称 / IP / 端口 / 分类）"
+                  className="w-full pl-8 pr-8 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    title="清除"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              {/* 分类 tab 栏：过滤 + 连接数摘要 */}
+              <div className="flex items-center gap-1.5 overflow-x-auto">
+                {tabStats.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveCategory(tab.key)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
+                      activeCategory === tab.key
+                        ? 'bg-primary-improved text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className={`text-xs ${activeCategory === tab.key ? 'text-white/80' : 'text-slate-400 dark:text-slate-500'}`}>
+                      {tab.connected}/{tab.total}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
             {visibleDevices.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500 gap-3">
-                <p className="text-sm">当前分类暂无设备</p>
+                <p className="text-sm">{searchQuery.trim() ? '未找到匹配的设备' : '当前分类暂无设备'}</p>
               </div>
             ) : (
               <div className="grid gap-3">
