@@ -73,7 +73,7 @@ export default function DeviceCard({
       data-is-active={isActive.toString()}
       onClick={() => isClickable && onSwitch(device.id)}
       className={`
-        group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
+        device-card group relative flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
         ${cardStyle}
         ${isClickable ? 'cursor-pointer' : ''}
       `}

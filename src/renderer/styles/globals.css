@@ -80,6 +80,12 @@
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
+/* 长列表性能优化：设备卡片跳过屏幕外渲染/绘制（设备数量多时避免卡顿） */
+.device-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 76px;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
